@@ -308,12 +308,14 @@ t.test(senti_clinton, senti_trump, paired = TRUE)
 # 2.
 #------------------------------------------------------
 
+# new dataset
+# step (1)
 tweets_writers <- tweets[(tweets$source_url ==
                             "http://twitter.com/download/iphone")  |
                          (tweets$source_url ==
-                            "http://twitter.com/download/android") |
-                          (tweets$handle ==
-                              "Donald Trump") ,]
+                            "http://twitter.com/download/android"),]
+# step (2)
+tweets_writers <- tweets_writers[(tweets_writers$handle != "HillaryClinton"),]
 
 # emotions
 writers_emo <- ggplot(tweets_writers, aes(x    = tweets_writers$text_emotion,
