@@ -1,0 +1,124 @@
+---
+title: "A skizofrén Trump hipotézis"
+author: "Farsang Bence"
+date: '2017 május 1 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Többen feltételezték, hogy Trump tweetjeit (legalább) két különböző ember írja, az androidosokat feltételezhetően Trump, az iphone-osokat pedig valaki más (a mi adatainkban a source_url oszlop tartalmaz erre vonatkozó információkat). Valóban bizonyítható statisztikailag, hogy több személy posztol Trump nevében a Twitteren? Az alábbiakban lehull a lepel a feltételezésről.
+
+## Trump vs. Clinton
+Először vizsgáljuk meg, hogy meg lehet-e különböztetni a két elnökjelöltet tweetjeik **érzelmi töltete** és **hangulata** alapján:
+
+
+```{r fig.width=7, fig.height=4, echo=FALSE}
+library(ggplot2)
+tweets <-  read.csv2( file = "data/clinton_trump_tweets.csv" )
+emo <- ggplot(tweets, aes(x = tweets$text_emotion, fill = tweets$handle)) +
+  geom_bar(stat = "count", position = position_dodge())
+emo
+```
+
+```{r fig.width=7, fig.height=4, echo=FALSE}
+library(ggplot2)
+tweets <-  read.csv2( file = "data/clinton_trump_tweets.csv" )
+senti <- ggplot(tweets, aes(x = tweets$text_sentiment, fill = tweets$handle)) +
+  geom_bar(stat = "count", position = position_dodge())
+
+senti
+```
+Két mintás t-statisztika:
+
+<pre><code> > t.test(emo_clinton  , emo_trump  , paired = TRUE)
+
+	Paired t-test
+
+data:  emo_clinton and emo_trump
+t = 0.017859, df = 6, p-value = 0.9863
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -155.4444  157.7301
+sample estimates:
+mean of the differences 
+               1.142857
+               
+> t.test(senti_clinton, senti_trump, paired = TRUE)
+
+	Paired t-test
+
+data:  senti_clinton and senti_trump
+t = 0.031779, df = 2, p-value = 0.9775
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -358.3832  363.7165
+sample estimates:
+mean of the differences 
+               2.666667 
+
+</code></pre>
+
+A két mintás t-statisztika szerint a két elnökjelölt nem megkülönböztethető a tweetjeik alapján.
+
+## Trump iPhone vs. Trump Android
+
+```{r fig.width=7, fig.height=4, echo=FALSE}
+tweets_writers <- tweets[(tweets$source_url ==
+                            "http://twitter.com/download/iphone")  |
+                         (tweets$source_url ==
+                            "http://twitter.com/download/android") |
+                          (tweets$handle ==
+                              "Donald Trump") ,]
+
+# emotions
+writers_emo <- ggplot(tweets_writers, aes(x    = tweets_writers$text_emotion,
+                                          fill = tweets_writers$source_url)) +
+                      geom_bar(stat = "count", position = position_dodge()) +
+                      scale_fill_manual( values = c("lawngreen","skyblue"))
+writers_emo 
+```
+
+```{r fig.width=7, fig.height=4, echo=FALSE}
+# sentiments
+writers_senti <- ggplot(tweets_writers, aes(x    = tweets_writers$text_sentiment, 
+                                            fill = tweets_writers$source_url)) +
+                        geom_bar(stat = "count", position = position_dodge())+
+                      scale_fill_manual( values = c("lawngreen","skyblue"))
+writers_senti
+```
+
+Két mintás t-statisztika:
+
+<pre><code> 
+> t.test(emo_iphone  , emo_android  , paired = TRUE)
+
+	Paired t-test
+
+data:  emo_iphone and emo_android
+t = 0.13155, df = 6, p-value = 0.8996
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -113.1473  126.0044
+sample estimates:
+mean of the differences 
+               6.428571 
+
+> t.test(senti_iphone, senti_android, paired = TRUE)
+
+	Paired t-test
+
+data:  senti_iphone and senti_android
+t = 0.082402, df = 2, p-value = 0.9418
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -768.2286  798.2286
+sample estimates:
+mean of the differences 
+                     15
+
+</code></pre>
+
+A két mintás t-statisztika szerint az iPhone-os és Androidos szignifikánsan különbözőek, vagyis nem zárható ki, hogy Trumpon kívül más is írt posztokat.
